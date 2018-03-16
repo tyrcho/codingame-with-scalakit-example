@@ -27,6 +27,22 @@ This example is just for a quick test, do not use it, **instead follow
 the following steps with your own copy of codingame-scala-kit** and not mine ;)
 
 
+## How to use this example FROM WINDOWS ?
+
+* You need at least Windows 7 and git 2.11.1 (tested with git 2.16.2, see this [SO](https://stackoverflow.com/a/42137273/701317) for details)
+* You must run this in an Admin command line
+
+    git clone -c core.symlinks=true --recurse-submodules git@github.com:dacr/codingame-with-scalakit-example.git
+    
+Then **you have to remove all symlink files** since they are created before their target exists (they are in the submodule which is not cloned at this time).
+
+And finally, from codingame-with-scalakit folder:
+
+    git reset --hard
+
+The option `core.symlinks=true` is still active and thus the symlinks are correctly created this time.
+
+
 ## How this project was created ?
 
 All the executed steps in order to create this project are the following :
@@ -142,4 +158,3 @@ $ git push origin master
 And then you'll use the github web interface, and in your own copy of codinggame-scala-kit
 you'll be able to create a new pull request for
 [huiwang/codingame-scala-kit](https://github.com/huiwang/codingame-scala-kit)
-
