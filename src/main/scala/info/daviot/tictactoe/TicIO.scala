@@ -1,6 +1,7 @@
 package info.daviot.tictactoe
 
 import com.truelaurel.codingame.challenge.{GameAccumulator, GameIO}
+import com.truelaurel.math.geometry.Pos
 
 object TicIO extends GameIO[TicContext, State, Action] {
   /**
@@ -13,19 +14,19 @@ object TicIO extends GameIO[TicContext, State, Action] {
     */
   override def readState(turn: Int, context: TicContext): State = {
     val Array(opponentrow, opponentcol) = readLine.split(" ").map(_.toInt)
-    val validactioncount = readInt
-    for (i <- 0 until validactioncount) {
+    val validPos = Seq.fill(readInt) {
       val Array(row, col) = readLine.split(" ").map(_.toInt)
+      Pos(row, col)
     }
 
-    State()
+    State(validPos)
   }
 
   /**
     * Writes action to the referee system
     */
   override def writeAction(state: State, action: Action): Unit = {
-    println("0 0")
+    println(s"${action.pos.x} ${action.pos.y}")
   }
 }
 
@@ -47,6 +48,6 @@ object Accumulator extends GameAccumulator[TicContext, State, Action] {
 
 case class TicContext()
 
-case class State()
+case class State(validActions: Seq[Pos])
 
-case class Action()
+case class Action(pos:Pos)

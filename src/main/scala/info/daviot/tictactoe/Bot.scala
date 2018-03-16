@@ -9,5 +9,6 @@ object Bot extends GameBot[State, Action] {
     * @param state current state of the game
     * @return one or more actions to play
     */
-  override def react(state: State): Action = Action()
+  override def react(state: State): Action =
+    Action(state.validActions.head)
 }
