@@ -1,7 +1,9 @@
 package info.daviot.tictactoe
 
 import com.truelaurel.codingame.challenge.{GameAccumulator, GameIO}
+import com.truelaurel.codingame.logging.CGLogger
 import com.truelaurel.math.geometry.Pos
+import com.truelaurel.samplegames.gomoku.GomokuBoard
 
 object TicIO extends GameIO[TicContext, State, Action] {
   /**
@@ -14,12 +16,17 @@ object TicIO extends GameIO[TicContext, State, Action] {
     */
   override def readState(turn: Int, context: TicContext): State = {
     val Array(opponentrow, opponentcol) = readLine.split(" ").map(_.toInt)
+    val opMove = Pos(opponentrow, opponentcol)
     val validPos = Seq.fill(readInt) {
       val Array(row, col) = readLine.split(" ").map(_.toInt)
       Pos(row, col)
     }
 
-    State(validPos)
+    val board = if (opMove == Pos(-1, -1)) context.board
+    else context.board.play(opMove)
+
+    CGLogger.info(board)
+    State(validPos, board)
   }
 
   /**
@@ -43,11 +50,19 @@ object Accumulator extends GameAccumulator[TicContext, State, Action] {
     * @param action  actions performed for the current round
     * @return a new context accumulated with historical events including those generated from the current round
     */
-  override def accumulate(context: TicContext, state: State, action: Action): TicContext = context
+  override def accumulate(context: TicContext, state: State, action: Action): TicContext =
+    TicContext(state.board.play(action.pos))
 }
 
-case class TicContext()
+case class TicContext(board: GomokuBoard = GomokuBoard(3))
 
-case class State(validActions: Seq[Pos])
+case class State(validActions: Seq[Pos], board: GomokuBoard) {
+  def play(pos: Pos): State =
+    if (pos == Pos(-1, -1)) this
+    else copy(board = board.play(pos))
 
-case class Action(pos:Pos)
+  def play(action: Action): State =
+    play(action.pos)
+}
+
+case class Action(pos: Pos)
