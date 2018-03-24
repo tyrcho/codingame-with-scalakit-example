@@ -15,7 +15,7 @@ object Bot extends GameBot[State, Action] {
     * @return one or more actions to play
     */
   override def react(state: State): Action =
-    Action(alphaBetaMove(state.board))
+    Action(state.validActions.head)
 
 
   def alphaBetaMove(s: GomokuBoard): Pos =
