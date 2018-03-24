@@ -1,7 +1,7 @@
 package info.daviot.tictactoe
 
 import com.truelaurel.math.geometry.Pos
-import com.truelaurel.samplegames.gomoku.GomokuBoard
+import com.truelaurel.samplegames.gomoku.{GomokuBoard, GomokuRules}
 
 case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = Map.empty,
                          lastMove: Option[Pos] = None,
@@ -25,8 +25,16 @@ case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = Map.empty,
                 col <- 0 to 8
             } yield Pos(row, col)
             case Some(last) =>
-                val smallBoard = nextSmallBoard.get
-                for {
+                val smallBoard = smallBoards.getOrElse(last % 3, emptySmallBoard)
+                if (isFinished(smallBoard))
+                    for {
+                        row <- 0 to 8
+                        col <- 0 to 8
+                        pos = Pos(row, col)
+                        b = boardToPlay(pos)
+                        if b.isFree(pos % 3) && !isFinished(b)
+                    } yield pos
+                else for {
                     row <- last.x * 3 until (1 + last.x) * 3
                     col <- last.y * 3 until (1 + last.y) * 3
                     pos = Pos(row, col)
@@ -34,6 +42,10 @@ case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = Map.empty,
                 } yield pos
         }).toSet
 
+
+    private def isFinished(smallBoard: GomokuBoard) = {
+        GomokuRules(3, 3).hasWon(smallBoard, true) || GomokuRules(3, 3).hasWon(smallBoard, false)
+    }
 
     private def boardToPlay(p: Pos): GomokuBoard =
         smallBoards.getOrElse(p / 3, emptySmallBoard)

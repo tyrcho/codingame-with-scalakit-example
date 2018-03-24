@@ -38,13 +38,13 @@ class UltimateBoardTest extends FlatSpec with Matchers {
         )
     }
 
+    val movesToWinOnFirstCorner = Seq(Pos(3, 2), Pos(1, 7), Pos(5, 4), Pos(6, 4), Pos(2, 4),
+        Pos(7, 4), Pos(4, 4), Pos(5, 3), Pos(6, 0), Pos(2, 2), Pos(7, 6),
+        Pos(5, 2), Pos(6, 6), Pos(0, 2), Pos(0, 6), Pos(1, 2))
+
 
     it should "debug properly" in {
-        val moves = Seq(Pos(3, 2), Pos(1, 7), Pos(5, 4), Pos(6, 4), Pos(2, 4),
-            Pos(7, 4), Pos(4, 4), Pos(5, 3), Pos(6, 0), Pos(2, 2), Pos(7, 6),
-            Pos(5, 2), Pos(6, 6), Pos(0, 2), Pos(0, 6), Pos(1, 2))
-
-        moves.zipWithIndex.foldLeft(emptyBoard) {
+        movesToWinOnFirstCorner.zipWithIndex.foldLeft(emptyBoard) {
             case (board, (pos, i)) =>
                 val next = board.play(pos)
                 new Approver().writeTo("properDebug" + (i + 1)).verify(next.debugString)
@@ -52,26 +52,19 @@ class UltimateBoardTest extends FlatSpec with Matchers {
         }
     }
 
-    //  it should "allow to play anywhere when sent on a completed small board" in {
-    //    val board = emptyBoard
-    //      .play(Pos(3, 2)) // ..O| ...|X..
-    //      .play(Pos(1, 7)) // ..O| ...|.O.
-    //      .play(Pos(5, 4)) // ..O| .X.|...
-    //      .play(Pos(6, 4)) // ------------
-    //      .play(Pos(2, 4)) // ..X| ...|...
-    //      .play(Pos(7, 4)) // ...| .X.|...
-    //      .play(Pos(4, 4)) // ..O| OX.|...
-    //      .play(Pos(5, 3)) // ------------
-    //      .play(Pos(6, 0)) // X..| .O.|X..
-    //      .play(Pos(2, 2)) // ...| .O.|X..
-    //      .play(Pos(7, 6)) // ...| ...|...
-    //      .play(Pos(5, 2))
-    //      .play(Pos(5, 2))
-    //      .play(Pos(6, 6))
-    //      .play(Pos(0, 2))
-    //      .play(Pos(1, 2))
-    //
-    //
-    //  }
+    it should "allow to play anywhere when sent on a completed small board" in {
+        val boardWithFirstCornerDone = movesToWinOnFirstCorner.foldLeft(emptyBoard) {
+            case (board, pos) => board.play(pos)
+        }
+
+        new Approver().writeTo("validMovesAfterCornerCompleted").verify(
+            boardWithFirstCornerDone
+                .play(Pos(4, 8))
+                .play(Pos(3, 8))
+                .play(Pos(1, 6))
+                .play(Pos(5, 1))
+                .play(Pos(6, 3))
+                .validMoves.toList.sortBy(Pos.unapply).mkString("\n"))
+    }
 
 }
