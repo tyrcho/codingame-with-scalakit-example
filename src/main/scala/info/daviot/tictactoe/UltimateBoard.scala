@@ -2,6 +2,7 @@ package info.daviot.tictactoe
 
 import com.truelaurel.math.geometry.Pos
 import com.truelaurel.samplegames.gomoku.{GomokuBoard, GomokuRules}
+import info.daviot.tictactoe.UltimateBoard._
 
 case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = Map.empty,
                          lastMove: Option[Pos] = None,
@@ -18,46 +19,37 @@ case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = Map.empty,
             lastPlayer = !lastPlayer)
     }
 
-    def validMoves: Set[Pos] =
-        (lastMove match {
-            case None => for {
-                row <- 0 to 8
-                col <- 0 to 8
-            } yield Pos(row, col)
-            case Some(last) =>
-                val smallBoard = smallBoards.getOrElse(last % 3, emptySmallBoard)
-                if (isFinished(smallBoard))
-                    for {
-                        row <- 0 to 8
-                        col <- 0 to 8
-                        pos = Pos(row, col)
-                        b = boardToPlay(pos)
-                        if b.isFree(pos % 3) && !isFinished(b)
-                    } yield pos
-                else for {
-                    row <- last.x * 3 until (1 + last.x) * 3
-                    col <- last.y * 3 until (1 + last.y) * 3
-                    pos = Pos(row, col)
-                    if smallBoard.isFree(pos % 3)
-                } yield pos
-        }).toSet
+    def validMoves: Set[Pos] = {
+        lastMove.map { last =>
+            val smallBoard = smallBoards.getOrElse(last % 3, emptySmallBoard)
+            if (isFinished(smallBoard)) allFreePositions
+            else validMoves(last, smallBoard)
+        }.getOrElse(allValidMoves)
+    }.toSet
 
 
-    private def isFinished(smallBoard: GomokuBoard) = {
-        GomokuRules(3, 3).hasWon(smallBoard, true) || GomokuRules(3, 3).hasWon(smallBoard, false)
+    private def validMoves(last: Pos, smallBoard: GomokuBoard): Seq[Pos] = {
+        val startRow = last.x * 3
+        val startCol = last.y * 3
+        for {
+            row <- startRow until startRow + 3
+            col <- startCol until startCol + 3
+            pos = Pos(row, col)
+            if smallBoard.isFree(pos % 3)
+        } yield pos
     }
+
+    private def allFreePositions: Seq[Pos] =
+        for {
+            pos <- allValidMoves
+            b = boardToPlay(pos)
+            if b.isFree(pos % 3) && !isFinished(b)
+        } yield pos
+
 
     private def boardToPlay(p: Pos): GomokuBoard =
         smallBoards.getOrElse(p / 3, emptySmallBoard)
 
-    private def nextSmallBoard: Option[GomokuBoard] =
-        lastMove.map { lastPos =>
-            smallBoards.getOrElse(lastPos % 3, emptySmallBoard)
-        }
-
-    val emptySmallBoard = GomokuBoard(3)
-
-    val separatorLine: String = "-" * 11
 
     def debugString: String =
         (((0 to 2).map(debugRow) :+ separatorLine) ++
@@ -79,6 +71,27 @@ case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = Map.empty,
         else secondPlayerChar
     }
 
+}
+
+
+object UltimateBoard {
+    val rules = GomokuRules(3, 3)
+
     val firstPlayerChar = 'X'
     val secondPlayerChar = 'O'
+
+    val emptySmallBoard = GomokuBoard(3)
+
+    val separatorLine: String = "-" * 11
+
+    val allValidMoves: Seq[Pos] = for {
+        row <- 0 to 8
+        col <- 0 to 8
+    } yield Pos(row, col)
+
+    private def isFinished(smallBoard: GomokuBoard): Boolean =
+        hasWon(smallBoard, true) || hasWon(smallBoard, false)
+
+    private def hasWon(smallBoard: GomokuBoard, player: Boolean) =
+        rules.hasWon(smallBoard, player)
 }

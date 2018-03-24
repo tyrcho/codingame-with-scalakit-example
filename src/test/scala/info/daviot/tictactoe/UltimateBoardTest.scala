@@ -57,14 +57,16 @@ class UltimateBoardTest extends FlatSpec with Matchers {
             case (board, pos) => board.play(pos)
         }
 
+        val moves = boardWithFirstCornerDone
+            .play(Pos(4, 8))
+            .play(Pos(3, 8))
+            .play(Pos(1, 6))
+            .play(Pos(5, 1))
+            .play(Pos(6, 3))
+            .validMoves
+
         new Approver().writeTo("validMovesAfterCornerCompleted").verify(
-            boardWithFirstCornerDone
-                .play(Pos(4, 8))
-                .play(Pos(3, 8))
-                .play(Pos(1, 6))
-                .play(Pos(5, 1))
-                .play(Pos(6, 3))
-                .validMoves.toList.sortBy(Pos.unapply).mkString("\n"))
+            moves.toList.sortBy(Pos.unapply).mkString("\n"))
     }
 
 }
