@@ -1,6 +1,7 @@
 package info.daviot.tictactoe
 
-import com.github.writethemfirst.approvals.Approver
+import com.github.writethemfirst.approvals.utils.functions.Function1
+import com.github.writethemfirst.approvals.{Approver, CombinationApprover}
 import com.truelaurel.math.geometry.Pos
 import com.truelaurel.samplegames.gomoku.GomokuBoard
 import org.scalatest.{FlatSpec, Matchers}
@@ -20,22 +21,19 @@ class UltimateBoardTest extends FlatSpec with Matchers {
         moves should have size 81
     }
 
-    it should "produce 9 valid moves after first play" in {
-        val moves = emptyBoard.play(Pos(1, 0)).validMoves
-        moves shouldBe Set(
-            Pos(3, 0), Pos(3, 1), Pos(3, 2),
-            Pos(4, 0), Pos(4, 1), Pos(4, 2),
-            Pos(5, 0), Pos(5, 1), Pos(5, 2)
-        )
+    def verifyAll[I, O](name: String, inputs: Iterable[I], f: I => O): Unit = {
+        import scala.collection.JavaConverters._
+        val list = asJavaIterable(inputs)
+        val fJ: Function1[I, O] = i => f(i)
+        new CombinationApprover().writeTo(name)
+            .verifyAllCombinations(list, fJ)
     }
 
-    it should "produce 8 valid moves after first play at 0,0" in {
-        val moves = emptyBoard.play(Pos(0, 0)).validMoves
-        moves shouldBe Set(
-            Pos(0, 1), Pos(0, 2),
-            Pos(1, 0), Pos(1, 1), Pos(1, 2),
-            Pos(2, 0), Pos(2, 1), Pos(2, 2)
-        )
+    it should "produce valid moves after first plays" in {
+        verifyAll(
+            "initial valid moves",
+            Seq(Pos(0, 0), Pos(1, 0), Pos(7, 1), Pos(4, 4)),
+            (p: Pos) => emptyBoard.play(p).validMoves.toSeq.sortBy(Pos.unapply))
     }
 
     val movesToWinOnFirstCorner = Seq(Pos(3, 2), Pos(1, 7), Pos(5, 4), Pos(6, 4), Pos(2, 4),
