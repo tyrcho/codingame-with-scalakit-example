@@ -97,7 +97,7 @@ case class UltimateBoard(smallBoards: Map[Pos, SmallBoard] = emptyBoards,
         val board = smallBoards.getOrElse(pos / 3, emptySmallBoard)
         val smallPos = pos % 3
         if (board.isFree(smallPos)) '.'
-        else if (board.playedFalse(smallPos)) firstPlayerChar
+        else if (board.playedFalse.contains(smallPos)) firstPlayerChar
         else secondPlayerChar
     }
 
