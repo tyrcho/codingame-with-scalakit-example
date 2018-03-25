@@ -8,8 +8,8 @@ class SmallBoardTest extends FlatSpec with Matchers with Approving {
 
     "small board" should "allow 2 moves for same player" in {
         val played = SmallBoard()
-            .forcePlay(Pos(0, 1), true)
-            .forcePlay(Pos(0, 2), true)
+            .forcePlay(Pos(0, 1), player = true)
+            .forcePlay(Pos(0, 2), player = true)
 
         verify(played.toText, "smallBoard")
     }
@@ -21,5 +21,13 @@ class SmallBoardTest extends FlatSpec with Matchers with Approving {
                 verify(next.toText + next.outcome, "outcome" + i)
                 next
         }
+    }
+
+    it should "have correct free" in {
+        val moves = Seq(Pos(0, 0), Pos(1, 2), Pos(1, 1), Pos(2, 1), Pos(2, 2))
+        val board=moves.foldLeft(SmallBoard()) {
+            case (b, move) => b.play(move)
+        }
+        verifyAll("free", SmallBoard.allPos, board.isFree)
     }
 }

@@ -56,5 +56,10 @@ case class SmallBoard(dataTrue: GridData = GridData(3),
 
 
 object SmallBoard {
+    val allPos: Iterable[Pos] = for {
+        row <- 0 to 2
+        col <- 0 to 2
+    } yield Pos(row, col)
+
     val masks = Masks(3, 3)
 }
