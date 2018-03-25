@@ -18,9 +18,11 @@ object UltimateBoardDemo {
 
 
     def mctsMove(s: UltimateBoard): Pos = {
-        val chronometer = new Chronometer(100.millis)
+        val chronometer = new Chronometer(1000.millis)
         chronometer.start()
-        MctsAi(UltimateRules)(_ => chronometer.willOutOfTime).chooseMove(s)
+        val (move, count) = MctsAi(UltimateRules)(_ => chronometer.willOutOfTime).chooseMoveCount(s)
+        println(s"$count moves explored")
+        move
     }
 
 }

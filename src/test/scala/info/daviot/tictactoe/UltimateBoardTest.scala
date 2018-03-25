@@ -2,7 +2,7 @@ package info.daviot.tictactoe
 
 import com.github.writethemfirst.approvals.utils.functions.Function1
 import com.github.writethemfirst.approvals.{Approver, CombinationApprover}
-import com.truelaurel.algorithm.game.Draw
+import com.truelaurel.algorithm.game.{Draw, Undecided}
 import com.truelaurel.math.geometry.Pos
 import com.truelaurel.samplegames.gomoku.GomokuBoard
 import org.scalatest.{FlatSpec, Matchers}
@@ -106,6 +106,10 @@ class UltimateBoardTest extends FlatSpec with Matchers {
 
         val board = UltimateBoard.fromString(boardString).copy(lastMove = Some(Pos(2, 3)))
         verifyMoves(board.validMoves, "subBoard full")
+    }
+
+    it should "initially be undecided" in {
+        UltimateBoard().gameResult shouldBe Undecided
     }
 
     it should "detect draw" in {

@@ -5,7 +5,7 @@ import com.truelaurel.math.geometry.Pos
 import com.truelaurel.samplegames.gomoku.{GomokuBoard, GomokuRules}
 import info.daviot.tictactoe.UltimateBoard._
 
-case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = Map.empty,
+case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = emptyBoards,
                          lastMove: Option[Pos] = None,
                          lastPlayer: Boolean = true)
     extends GameState[Boolean] {
@@ -25,27 +25,43 @@ case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = Map.empty,
             lastPlayer = player)
     }
 
-    def validMoves: Set[Pos] = {
+    private lazy val smallOutcomes: Map[Pos, Outcome[Boolean]] =
+        smallBoards.mapValues { board =>
+            if (hasWon(board, true)) Wins(true)
+            else if (hasWon(board, true)) Wins(false)
+            else if (isFinished(board)) Draw
+            else Undecided
+        }.withDefaultValue(Undecided)
+
+
+    private lazy val allFreePositions: Seq[Pos] =
+        for {
+            pos <- allValidMoves
+            if !isFinishedSmall(pos / 3)
+            b = boardToPlay(pos)
+            if b.isFree(pos % 3)
+        } yield pos
+
+    lazy val validMoves: Set[Pos] = {
         lastMove.map { last =>
             val next = last % 3
             val smallBoard = smallBoards.getOrElse(next, emptySmallBoard)
-            if (isFinished(smallBoard)) allFreePositions
+            if (isFinishedSmall(next)) allFreePositions
             else validMoves(next, smallBoard)
         }.getOrElse(allValidMoves)
     }.toSet
 
-    def gameResult: Outcome[Boolean] = {
-        def wonBy(player: Boolean) = smallBoards.collect {
-            case (pos, board) if hasWon(board, player) => (pos, player)
-        }
+    private def isFinishedSmall(pos: Pos) = smallOutcomes(pos) != Undecided
 
-        val allWonBoards = wonBy(true) ++ wonBy(false)
-        val metaBoard = allWonBoards.foldLeft(emptySmallBoard) {
-            case (board, (pos, winner)) => board.forcePlay(pos, winner)
+
+    lazy val gameResult: Outcome[Boolean] = {
+        val metaBoard = smallOutcomes.foldLeft(emptySmallBoard) {
+            case (board, (pos, Wins(winner))) => board.forcePlay(pos, winner)
+            case (board, _) => board
         }
         if (hasWon(metaBoard, true)) Wins(true)
         else if (hasWon(metaBoard, false)) Wins(false)
-        else if (smallBoards.values.count(isFinished) == 9) Draw
+        else if (smallOutcomes.values.count(Undecided.==) == 0) Draw
         else Undecided
     }
 
@@ -60,19 +76,12 @@ case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = Map.empty,
         } yield pos
     }
 
-    private def allFreePositions: Seq[Pos] =
-        for {
-            pos <- allValidMoves
-            b = boardToPlay(pos)
-            if b.isFree(pos % 3) && !isFinished(b)
-        } yield pos
-
 
     private def boardToPlay(p: Pos): GomokuBoard =
         smallBoards.getOrElse(p / 3, emptySmallBoard)
 
 
-    def debugString: String =
+    lazy val debugString: String =
         (((0 to 2).map(debugRow) :+ separatorLine) ++
             ((3 to 5).map(debugRow) :+ separatorLine) ++
             (6 to 8).map(debugRow)).mkString("\n")
@@ -92,12 +101,26 @@ case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = Map.empty,
         else secondPlayerChar
     }
 
-    def nextPlayer: Boolean = !lastPlayer
+    val nextPlayer: Boolean = !lastPlayer
 }
 
 
 object UltimateBoard {
-    def fromString(boardString: String) = {
+    val emptySmallBoard = GomokuBoard(3)
+
+    val emptyBoards: Map[Pos, GomokuBoard] = {
+        for {
+            row <- 0 to 2
+            col <- 0 to 2
+        } yield Pos(row, col) -> emptySmallBoard
+    }.toMap
+
+    val allValidMoves: Seq[Pos] = for {
+        row <- 0 to 8
+        col <- 0 to 8
+    } yield Pos(row, col)
+
+    def fromString(boardString: String): UltimateBoard = {
         val allLines = boardString.split("\n")
         val lines9 = allLines.take(3) ++ allLines.slice(4, 7) ++ allLines.slice(8, 11)
         val lines = lines9.map(line => line.take(3) ++ line.slice(4, 7) ++ line.slice(8, 11))
@@ -116,14 +139,9 @@ object UltimateBoard {
     val firstPlayerChar = 'X'
     val secondPlayerChar = 'O'
 
-    val emptySmallBoard = GomokuBoard(3)
 
     val separatorLine: String = "-" * 11
 
-    val allValidMoves: Seq[Pos] = for {
-        row <- 0 to 8
-        col <- 0 to 8
-    } yield Pos(row, col)
 
     private def isFinished(smallBoard: GomokuBoard): Boolean =
         hasWon(smallBoard, true) || hasWon(smallBoard, false) || smallBoard.free.isEmpty
