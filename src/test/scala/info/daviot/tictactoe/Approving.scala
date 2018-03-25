@@ -15,7 +15,9 @@ trait Approving {
     }
 
     def verifyMoves(moves: Set[Pos], name: String): Unit =
-        new Approver().writeTo(name).testing(this.getClass)
-            .verify(moves.toList.sortBy(Pos.unapply).mkString("\n"))
+        verify(moves.toList.sortBy(Pos.unapply).mkString("\n"), name)
 
+    def verify(output: Any, name: String): Unit =
+        new Approver().writeTo(name).testing(this.getClass)
+            .verify(output)
 }
