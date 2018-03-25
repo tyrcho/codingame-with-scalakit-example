@@ -2,10 +2,10 @@ package info.daviot.tictactoe
 
 import com.truelaurel.algorithm.game._
 import com.truelaurel.math.geometry.Pos
-import com.truelaurel.samplegames.gomoku.{GomokuBoard, GomokuRules}
+import com.truelaurel.samplegames.gomoku.GomokuRules
 import info.daviot.tictactoe.UltimateBoard._
 
-case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = emptyBoards,
+case class UltimateBoard(smallBoards: Map[Pos, SmallBoard] = emptyBoards,
                          lastMove: Option[Pos] = None,
                          lastPlayer: Boolean = true)
     extends GameState[Boolean] {
@@ -65,7 +65,7 @@ case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = emptyBoards,
         else Undecided
     }
 
-    private def validMoves(last: Pos, smallBoard: GomokuBoard): Seq[Pos] = {
+    private def validMoves(last: Pos, smallBoard: SmallBoard): Seq[Pos] = {
         val startRow = last.x * 3
         val startCol = last.y * 3
         for {
@@ -77,7 +77,7 @@ case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = emptyBoards,
     }
 
 
-    private def boardToPlay(p: Pos): GomokuBoard =
+    private def boardToPlay(p: Pos): SmallBoard =
         smallBoards.getOrElse(p / 3, emptySmallBoard)
 
 
@@ -106,9 +106,9 @@ case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = emptyBoards,
 
 
 object UltimateBoard {
-    val emptySmallBoard = GomokuBoard(3)
+    val emptySmallBoard = SmallBoard()
 
-    val emptyBoards: Map[Pos, GomokuBoard] = {
+    val emptyBoards: Map[Pos, SmallBoard] = {
         for {
             row <- 0 to 2
             col <- 0 to 2
@@ -143,9 +143,9 @@ object UltimateBoard {
     val separatorLine: String = "-" * 11
 
 
-    private def isFinished(smallBoard: GomokuBoard): Boolean =
+    private def isFinished(smallBoard: SmallBoard): Boolean =
         hasWon(smallBoard, true) || hasWon(smallBoard, false) || smallBoard.free.isEmpty
 
-    private def hasWon(smallBoard: GomokuBoard, player: Boolean) =
-        rules.hasWon(smallBoard, player)
+    private def hasWon(smallBoard: SmallBoard, player: Boolean) =
+        smallBoard.hasWon( player)
 }

@@ -4,14 +4,13 @@ import com.github.writethemfirst.approvals.utils.functions.Function1
 import com.github.writethemfirst.approvals.{Approver, CombinationApprover}
 import com.truelaurel.algorithm.game.{Draw, Undecided}
 import com.truelaurel.math.geometry.Pos
-import com.truelaurel.samplegames.gomoku.GomokuBoard
 import org.scalatest.{FlatSpec, Matchers}
 
 class UltimateBoardTest extends FlatSpec with Matchers {
     val emptyBoard = UltimateBoard()
 
     "small board" should "allow 2 moves for same player" in {
-        val played = GomokuBoard(3)
+        val played = SmallBoard()
             .forcePlay(Pos(0, 1), true)
             .forcePlay(Pos(0, 2), true)
         new Approver().writeTo("smallBoard").verify(played.toText)
