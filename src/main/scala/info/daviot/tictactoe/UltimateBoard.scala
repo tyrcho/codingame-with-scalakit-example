@@ -12,13 +12,17 @@ case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = Map.empty,
 
 
     def play(pos: Pos): UltimateBoard = {
+        forcePlay(pos, !lastPlayer)
+    }
+
+    private def forcePlay(pos: Pos, player: Boolean): UltimateBoard = {
         val key = pos / 3
         val oldSmallBoard = boardToPlay(pos)
-        val smallBoard = oldSmallBoard.forcePlay(pos % 3, !lastPlayer)
+        val smallBoard = oldSmallBoard.forcePlay(pos % 3, player)
         copy(
             lastMove = Some(pos),
             smallBoards = smallBoards.updated(key, smallBoard),
-            lastPlayer = !lastPlayer)
+            lastPlayer = player)
     }
 
     def validMoves: Set[Pos] = {
@@ -92,6 +96,20 @@ case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = Map.empty,
 
 
 object UltimateBoard {
+    def fromString(boardString: String) = {
+        val allLines = boardString.split("\n")
+        val lines9 = allLines.take(3) ++ allLines.slice(4, 7) ++ allLines.slice(8, 11)
+        val lines = lines9.map(line => line.take(3) ++ line.slice(4, 7) ++ line.slice(8, 11))
+        allValidMoves.foldLeft(UltimateBoard()) {
+            case (board, pos) =>
+                lines(pos.x)(pos.y) match {
+                    case '.' => board
+                    case `firstPlayerChar` => board.forcePlay(pos, false)
+                    case `secondPlayerChar` => board.forcePlay(pos, true)
+                }
+        }
+    }
+
     val rules = GomokuRules(3, 3)
 
     val firstPlayerChar = 'X'

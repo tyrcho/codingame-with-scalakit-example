@@ -67,4 +67,21 @@ class UltimateBoardTest extends FlatSpec with Matchers {
             moves.toList.sortBy(Pos.unapply).mkString("\n"))
     }
 
+    it should "read from strings" in {
+        val boardString =
+            """X.O|.OX|O.X
+              |OXO|OOX|XO.
+              |XOX|OO.|XXX
+              |-----------
+              |X..|XOO|.XO
+              |OXO|XXO|X.O
+              |..X|O.O|XXX
+              |-----------
+              |OXO|XXO|O.O
+              |OXX|XXO|O.O
+              |XOX|.OX|OX.""".stripMargin
+        val board=UltimateBoard.fromString(boardString)
+        new Approver().writeTo("read from string").verify(board.debugString)
+    }
+
 }
