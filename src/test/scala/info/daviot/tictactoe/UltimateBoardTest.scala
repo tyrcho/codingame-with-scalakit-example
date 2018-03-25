@@ -6,28 +6,14 @@ import com.truelaurel.algorithm.game.{Draw, Undecided}
 import com.truelaurel.math.geometry.Pos
 import org.scalatest.{FlatSpec, Matchers}
 
-class UltimateBoardTest extends FlatSpec with Matchers {
+class UltimateBoardTest extends FlatSpec with Matchers with Approving {
     val emptyBoard = UltimateBoard()
-
-    "small board" should "allow 2 moves for same player" in {
-        val played = SmallBoard()
-            .forcePlay(Pos(0, 1), true)
-            .forcePlay(Pos(0, 2), true)
-        new Approver().writeTo("smallBoard").verify(played.toText)
-    }
 
     "board" should "produce 81 initial valid moves" in {
         val moves = emptyBoard.validMoves
         moves should have size 81
     }
 
-    def verifyAll[I, O](name: String, inputs: Iterable[I], f: I => O): Unit = {
-        import scala.collection.JavaConverters._
-        val list = asJavaIterable(inputs)
-        val fJ: Function1[I, O] = i => f(i)
-        new CombinationApprover().writeTo(name)
-            .verifyAllCombinations(list, fJ)
-    }
 
 
     it should "produce valid moves after first plays" in {
@@ -67,9 +53,6 @@ class UltimateBoardTest extends FlatSpec with Matchers {
         verifyMoves(moves, "validMovesAfterCornerCompleted")
     }
 
-    private def verifyMoves(moves: Set[Pos], name: String): Unit =
-        new Approver().writeTo(name).verify(
-            moves.toList.sortBy(Pos.unapply).mkString("\n"))
 
 
     it should "read from strings" in {

@@ -49,7 +49,7 @@ case class SmallBoard(dataTrue: GridData = GridData(3),
             else if (playedTrue(Pos(x, y))) 'T'
             else ' '
         }.mkString
-    }.mkString("\n") + s"\n${nextPlayer.toString.toUpperCase.head} to play"
+    }.mkString("\n")
 
 
 }
