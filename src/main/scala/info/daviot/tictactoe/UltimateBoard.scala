@@ -125,7 +125,7 @@ object UltimateBoard {
     } yield Pos(row, col)
 
     private def isFinished(smallBoard: GomokuBoard): Boolean =
-        hasWon(smallBoard, true) || hasWon(smallBoard, false)
+        hasWon(smallBoard, true) || hasWon(smallBoard, false) || smallBoard.free.isEmpty
 
     private def hasWon(smallBoard: GomokuBoard, player: Boolean) =
         rules.hasWon(smallBoard, player)

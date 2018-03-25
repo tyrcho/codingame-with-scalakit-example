@@ -29,6 +29,7 @@ class UltimateBoardTest extends FlatSpec with Matchers {
             .verifyAllCombinations(list, fJ)
     }
 
+
     it should "produce valid moves after first plays" in {
         verifyAll(
             "initial valid moves",
@@ -63,9 +64,13 @@ class UltimateBoardTest extends FlatSpec with Matchers {
             .play(Pos(6, 3))
             .validMoves
 
-        new Approver().writeTo("validMovesAfterCornerCompleted").verify(
-            moves.toList.sortBy(Pos.unapply).mkString("\n"))
+        verifyMoves(moves, "validMovesAfterCornerCompleted")
     }
+
+    private def verifyMoves(moves: Set[Pos], name: String): Unit =
+        new Approver().writeTo(name).verify(
+            moves.toList.sortBy(Pos.unapply).mkString("\n"))
+
 
     it should "read from strings" in {
         val boardString =
@@ -80,8 +85,27 @@ class UltimateBoardTest extends FlatSpec with Matchers {
               |OXO|XXO|O.O
               |OXX|XXO|O.O
               |XOX|.OX|OX.""".stripMargin
-        val board=UltimateBoard.fromString(boardString)
+        val board = UltimateBoard.fromString(boardString)
         new Approver().writeTo("read from string").verify(board.debugString)
     }
+
+    it should "allow to play anywhere when sub board is full" in {
+        val boardString =
+            """.OX|XOX|.OO
+              |XOO|O.X|XOO
+              |.OX|OXO|.OX
+              |-----------
+              |XXO|X.X|OX.
+              |OX.|OOX|XOX
+              |OXO|XOX|..O
+              |-----------
+              |OOX|X.X|OOX
+              |XXO|XOX|.XO
+              |OXO|O.O|XX.""".stripMargin
+
+        val board = UltimateBoard.fromString(boardString).copy(lastMove = Some(Pos(2, 3)))
+        verifyMoves(board.validMoves, "subBoard full")
+    }
+
 
 }
