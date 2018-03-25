@@ -3,7 +3,7 @@ package info.daviot.tictactoe
 import com.truelaurel.algorithm.game._
 import com.truelaurel.math.geometry.Pos
 import com.truelaurel.math.geometry.grid.{BitGrid, GridData, Masks}
-
+import info.daviot.tictactoe.SmallBoard._
 
 case class SmallBoard(dataTrue: GridData = GridData(3),
                       dataFalse: GridData = GridData(3),
@@ -26,8 +26,6 @@ case class SmallBoard(dataTrue: GridData = GridData(3),
         else if (hasWon(false)) Wins(false)
         else if (free.isEmpty) Draw
         else Undecided
-
-    val masks = Masks(3, 3)
 
     def hasWon(player: Boolean): Boolean = {
         val data = if (player) dataTrue else dataFalse
@@ -57,3 +55,6 @@ case class SmallBoard(dataTrue: GridData = GridData(3),
 }
 
 
+object SmallBoard {
+    val masks = Masks(3, 3)
+}
