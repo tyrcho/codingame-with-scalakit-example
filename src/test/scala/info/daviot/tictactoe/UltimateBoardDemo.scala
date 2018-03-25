@@ -26,7 +26,7 @@ object UltimateBoardDemo {
             state.play(move)
 
         def outcome(state: UltimateBoard): Outcome[Boolean] =
-            state.gameResult.map(Wins.apply).getOrElse(Undecided)
+            state.gameResult
     }
 
 

@@ -1,6 +1,6 @@
 package info.daviot.tictactoe
 
-import com.truelaurel.algorithm.game.GameState
+import com.truelaurel.algorithm.game._
 import com.truelaurel.math.geometry.Pos
 import com.truelaurel.samplegames.gomoku.{GomokuBoard, GomokuRules}
 import info.daviot.tictactoe.UltimateBoard._
@@ -34,18 +34,19 @@ case class UltimateBoard(smallBoards: Map[Pos, GomokuBoard] = Map.empty,
         }.getOrElse(allValidMoves)
     }.toSet
 
-    def gameResult: Option[Boolean] = {
+    def gameResult: Outcome[Boolean] = {
         def wonBy(player: Boolean) = smallBoards.collect {
             case (pos, board) if hasWon(board, player) => (pos, player)
         }
 
-        val allFinishedBoards = wonBy(true) ++ wonBy(false)
-        val metaBoard = allFinishedBoards.foldLeft(emptySmallBoard) {
+        val allWonBoards = wonBy(true) ++ wonBy(false)
+        val metaBoard = allWonBoards.foldLeft(emptySmallBoard) {
             case (board, (pos, winner)) => board.forcePlay(pos, winner)
         }
-        if (hasWon(metaBoard, true)) Some(true)
-        else if (hasWon(metaBoard, false)) Some(false)
-        else None
+        if (hasWon(metaBoard, true)) Wins(true)
+        else if (hasWon(metaBoard, false)) Wins(false)
+        else if (smallBoards.values.count(isFinished) == 9) Draw
+        else Undecided
     }
 
     private def validMoves(last: Pos, smallBoard: GomokuBoard): Seq[Pos] = {
